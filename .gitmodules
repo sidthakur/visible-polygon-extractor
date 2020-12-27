@@ -1,0 +1,6 @@
+[submodule "third-party/librealsense"]
+	path = third-party/librealsense
+	url = https://github.com/IntelRealSense/librealsense.git
+[submodule "third-party/apriltag"]
+	path = third-party/apriltag
+	url = https://github.com/AprilRobotics/apriltag.git
