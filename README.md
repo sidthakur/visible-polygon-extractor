@@ -1,4 +1,71 @@
-# Visible Polygon Estimator
+# Visible Polygon Extractor
+
+## Application overview
+
+Modern C++ app to process the raw sensor output of Intel RealSense D400 series camera for extracting visible polygon
+representing the ground surface (visible ground polygon). Sensing the ground surface and identifying visible or drivable
+area is often a first step in the perception system of any robotics application.
+
+![](docs-assets/lego-car-detection.gif)
+
+**Visible Polygon Extractor** makes extensive use of the following libraries:
+
+- Boost Graph Library: for connected components and breadth first search graph traversal
+- Boost Geometry: for basic geometric types and geometric algorithms (union and simplification)
+- Intel RealSense SDK: for interacting with RealSense D400 series camera and utilize post-processing algorithms
+  (hole filling filter and point cloud calculations)
+
+## Algorithm overview
+
+The high-level algorithm implemented to extract the visible ground polygon is as follows:
+
+1. Calculate the point cloud using Intel RealSense SDK
+
+2. Transform the point cloud to account for camera tilt and orientation
+
+![](docs-assets/color-frame.jpeg)
+
+Test setup: camera setup with a slight tilt (10 deg roll, 0.5 deg yaw) looking at two fixed obstacles (cardboard boxes)
+placed on a table. Camera stand ~ 12 cm tall
+
+3. Identify points near the ground surface for selected points forming a 2d grid of with a parameterized `step`. Green
+   dots in the visual below are points near ground level (camera stand +/- 1 cm).
+
+![](docs-assets/color-frame_pixel.jpeg)
+
+4. Identify ground level rectangles (in the pixel domain) to find the boundary of the ground surface. Build a graph of
+   adjacent rectangles to identify connected components. Performing calculations in the pixel domain will help speed up
+   the computations. Blue rectangles in the visualization below represent the ground pixel rectangles.
+
+![](docs-assets/color-frame_pixel_rectangle.jpeg)
+
+5. Merge connected ground rectangles (in the pixel domain) to find the outer boundary of the visible ground polygon. Red
+   outline in the visualization below represents the boundary of the visible ground polygon
+
+![](docs-assets/color-frame_pixel_rectangle_merge.jpeg)
+
+6. Convert the visible ground polygon from pixel domain to cartesian (x, y, z) domain using the measurements from the
+   depth frame.
+
+![](docs-assets/color-frame_merge.jpeg)
+
+## Performance overview
+
+`step` can be tuned based on the required resolution for the target application. Basic performance figures for the app
+consuming an 640 x 480, RGB stream & an 848 x 480, Depth stream is as below
+
+* `step` set to `20 pixels` ~ frame rate: `10 Hz`
+* `step` set to `30 pixels` ~ frame rate: `15 Hz`
+
+## Use-case
+
+This application can be used to process data from the Intel RealSense D400 series camera in a fixed setting or on a
+moving target. It can be used to extract and transmit the visible ground polygon that can be consumed or visualized by a
+end user.
+
+**TODO**: extend capability to transmit visible ground polygon data and create a consumer / visualizer for the data.
+
+![](docs-assets/color-frame_with-lego_pixel_rectangle_merge.jpeg)
 
 ## Setup
 
@@ -41,6 +108,28 @@ pkg-config: using conda
 
 ```shell
 conda install -c conda-forge pkg-config
+```
+
+libopencv: using brew
+
+```shell
+brew install opencv@3
+```
+
+Add `/usr/local/opt/opencv@3/` to `CMAKE_PREFIX_PATH` to use the `libopencv` installed via brew
+
+boost: using brew
+
+```shell
+brew install boost
+```
+
+Add `/usr/local/Cellar/boost/1.75.0/` to `CMAKE_PREFIX_PATH` to use `libboost` installed via brew
+
+json: using conda
+
+```shell
+conda install -c conda-forge nlohmann_json
 ```
 
 4. Clone and build third party dependencies
