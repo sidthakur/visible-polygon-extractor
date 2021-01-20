@@ -15,6 +15,11 @@ area is often a first step in the perception system of any robotics application.
 - Intel RealSense SDK: for interacting with RealSense D400 series camera and utilize post-processing algorithms
   (hole filling filter and point cloud calculations)
 
+Visualize the images and visible ground polygon data in 3D using **Visible Polygon Visualizer**
+[GitHub link](https://github.com/sidthakur/visible-polygon-visualizer)
+
+![](docs-assets/visible-polygon-visualizer.png)
+
 ## Algorithm overview
 
 The high-level algorithm implemented to extract the visible ground polygon is as follows:
